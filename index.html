@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<title>MacroLens</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#0a0a0f;color:#e8e8f0;font-family:'IBM Plex Mono',monospace;min-height:100vh;padding-bottom:65px;}
+  :root{--acc:#00ff88;--cal:#ff3399;--pro:#ff6b35;--car:#00ccff;--fat:#ffcc00;--danger:#ff3355;--s1:#111118;--s2:#18181f;--bd:#222230;--mut:#55556a;}
+
+  /* NAV */
+  .nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#111118;border-top:1px solid #222230;display:flex;z-index:100;}
+  .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:#55556a;font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;}
+  .nb.on{color:#00ff88;}
+  .ni{font-size:20px;line-height:1;}
+
+  /* PAGES */
+  .pg{display:none;padding:12px;max-width:500px;margin:0 auto;}
+  .pg.on{display:block;}
+
+  /* HEADER */
+  h1{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;padding:12px 12px 8px;border-bottom:1px solid #222230;margin:-12px -12px 12px;}
+  h1 span{color:#00ff88;}
+
+  /* CARDS */
+  .card{background:#111118;border:1px solid #222230;border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .card-h{padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between;}
+  .card-t{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;}
+  .card-b{padding:0 14px 14px;}
+
+  /* RING */
+  .hero{display:flex;gap:14px;align-items:center;padding:14px;}
+  .rn{font-family:'Bebas Neue',sans-serif;font-size:22px;fill:#e8e8f0;}
+  .rl{font-size:7px;fill:#55556a;text-transform:uppercase;letter-spacing:1px;}
+  .stats{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .sr{display:flex;justify-content:space-between;align-items:baseline;}
+  .sl{font-size:9px;color:#55556a;text-transform:uppercase;letter-spacing:1px;}
+  .sv{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+
+  /* BARS */
+  .bars{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;}
+  .bi{display:flex;justify-content:space-between;margin-bottom:4px;}
+  .bn{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#55556a;}
+  .bv{font-size:10px;}
+  .track{height:5px;background:#222230;border-radius:3px;overflow:hidden;}
+  .fill{height:100%;border-radius:3px;transition:width .5s;}
+
+  /* LOG LIST */
+  .log-b{padding:0 14px 10px;}
+  .mg{margin-bottom:8px;}
+  .mt{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#55556a;border-bottom:1px solid #222230;padding-bottom:3px;margin-bottom:5px;}
+  .li{display:flex;align-items:center;gap:6px;padding:4px 0;}
+  .ln{flex:1;font-size:12px;}
+  .lc{font-size:10px;color:#55556a;}
+  .ld{background:none;border:none;color:#222230;cursor:pointer;font-size:11px;padding:2px 5px;}
+
+  /* TABS */
+  .tabs{display:flex;border-bottom:1px solid #222230;}
+  .tab{flex:1;padding:10px 6px;background:none;border:none;color:#55556a;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tab.on{color:#00ff88;border-bottom-color:#00ff88;}
+  .tp{display:none;padding:14px;} .tp.on{display:block;}
+
+  /* MEAL PILLS */
+  .pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .pill{padding:4px 10px;border:1px solid #222230;border-radius:100px;background:none;color:#55556a;font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;}
+  .pill.on{border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,.07);}
+
+  /* INPUTS */
+  label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#55556a;margin-bottom:4px;}
+  textarea,input[type=text],input[type=number],input[type=password]{width:100%;background:#18181f;border:1px solid #222230;border-radius:8px;color:#e8e8f0;font-family:'IBM Plex Mono',monospace;font-size:14px;padding:10px 12px;outline:none;-webkit-appearance:none;}
+  textarea{resize:none;height:90px;line-height:1.5;}
+  textarea:focus,input:focus{border-color:#00ff88;}
+  textarea::placeholder,input::placeholder{color:#55556a;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .gf label{margin-bottom:3px;}
+
+  /* BUTTONS */
+  .btn{display:block;width:100%;margin-top:10px;background:#00ff88;color:#000;border:none;border-radius:10px;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;}
+  .btn:disabled{opacity:.3;cursor:not-allowed;}
+  .btn-out{display:block;width:100%;margin-top:8px;background:none;border:1px solid #00ff88;color:#00ff88;border-radius:8px;padding:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;}
+  .btn-red{display:block;width:100%;margin-top:8px;background:none;border:1px solid #ff3355;color:#ff3355;border-radius:8px;padding:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;}
+  .btn-sm{font-size:9px;color:#55556a;background:none;border:1px solid #222230;border-radius:4px;padding:3px 7px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
+  .btn-save{background:#00ff88;color:#000;border:none;border-radius:8px;padding:9px 14px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;white-space:nowrap;}
+
+  /* RESULT */
+  .res{display:none;margin-top:10px;background:#18181f;border:1px solid #222230;border-radius:10px;padding:12px;}
+  .res.on{display:block;}
+  .rname{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;color:#00ff88;margin-bottom:8px;}
+  .rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+  .rc{background:#111118;border-radius:7px;padding:6px 3px;text-align:center;}
+  .rv{font-family:'Bebas Neue',sans-serif;font-size:15px;}
+  .rl2{font-size:8px;color:#55556a;text-transform:uppercase;margin-top:1px;}
+  .ritems{font-size:10px;color:#55556a;margin-top:6px;line-height:1.7;}
+
+  /* SPIN */
+  .spin-w{display:none;align-items:center;gap:8px;color:#55556a;font-size:11px;margin-top:8px;}
+  .spin-w.on{display:flex;}
+  .spin{width:14px;height:14px;border:2px solid #222230;border-top-color:#00ff88;border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  /* INFO BOX */
+  .info{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);border-radius:10px;padding:12px;font-size:11px;line-height:1.8;color:#55556a;margin-bottom:12px;}
+  .info strong{color:#00ff88;display:block;margin-bottom:3px;}
+  .info a{color:#00ff88;}
+  .info ol{padding-left:16px;}
+
+  /* KEY ROW */
+  .kr{display:flex;gap:6px;margin-bottom:6px;}
+  .kr input{flex:1;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(8px);background:#111118;border:1px solid #222230;border-radius:100px;padding:6px 16px;font-size:11px;opacity:0;transition:all .2s;pointer-events:none;z-index:9999;white-space:nowrap;}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:middle;}
+  .ks{font-size:10px;color:#00ff88;}
+  .empty{padding:24px;text-align:center;color:#55556a;font-size:12px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<!-- DASHBOARD -->
+<div class="pg on" id="pg-dash">
+  <h1>Macro<span>Lens</span></h1>
+  <div class="card">
+    <div class="hero">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle fill="none" stroke="#222230" stroke-width="7" cx="50" cy="50" r="42"/>
+        <circle fill="none" stroke="#ff3399" stroke-width="7" stroke-linecap="round"
+          stroke-dasharray="264" stroke-dashoffset="264" cx="50" cy="50" r="42"
+          transform="rotate(-90 50 50)" id="cring"
+          style="transition:stroke-dashoffset .7s"/>
+        <text class="rn" x="50" y="46" text-anchor="middle" dominant-baseline="middle" id="rnum">0</text>
+        <text class="rl" x="50" y="60" text-anchor="middle" id="rlbl">kcal</text>
+      </svg>
+      <div class="stats">
+        <div class="sr"><span class="sl">Eaten</span><span class="sv" id="s-eaten">0 kcal</span></div>
+        <div class="sr"><span class="sl">Target</span><span class="sv" id="s-target" style="color:#55556a">— set goal</span></div>
+        <div class="sr"><span class="sl">Left</span><span class="sv" id="s-left" style="color:#55556a">—</span></div>
+      </div>
+    </div>
+    <div class="bars">
+      <div>
+        <div class="bi"><span class="bn"><span class="dot" style="background:#ff6b35"></span>Protein</span><span class="bv"><b id="pv">0g</b> <span id="po" style="color:#55556a"></span></span></div>
+        <div class="track"><div class="fill" id="pb" style="background:#ff6b35"></div></div>
+        <div style="font-size:9px;color:#55556a;text-align:right;margin-top:2px" id="pp"></div>
+      </div>
+      <div>
+        <div class="bi"><span class="bn"><span class="dot" style="background:#00ccff"></span>Carbs</span><span class="bv"><b id="cv">0g</b> <span id="co" style="color:#55556a"></span></span></div>
+        <div class="track"><div class="fill" id="cb" style="background:#00ccff"></div></div>
+        <div style="font-size:9px;color:#55556a;text-align:right;margin-top:2px" id="cp"></div>
+      </div>
+      <div>
+        <div class="bi"><span class="bn"><span class="dot" style="background:#ffcc00"></span>Fat</span><span class="bv"><b id="fv">0g</b> <span id="fo" style="color:#55556a"></span></span></div>
+        <div class="track"><div class="fill" id="fb" style="background:#ffcc00"></div></div>
+        <div style="font-size:9px;color:#55556a;text-align:right;margin-top:2px" id="fp"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-t">Today's Log</span><button class="btn-sm" onclick="clearDay()">Clear</button></div>
+    <div id="logbody"></div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="pg" id="pg-log">
+  <h1>Log <span>Food</span></h1>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab on" id="tab-desc" onclick="stab('desc')">✏️ Describe</button>
+      <button class="tab" id="tab-man" onclick="stab('man')">🔢 Manual</button>
+    </div>
+
+    <div class="tp on" id="tp-desc">
+      <label>Meal</label>
+      <div class="pills" id="pp-desc">
+        <button class="pill on" onclick="spill(this,'desc')">Breakfast</button>
+        <button class="pill" onclick="spill(this,'desc')">Lunch</button>
+        <button class="pill" onclick="spill(this,'desc')">Dinner</button>
+        <button class="pill" onclick="spill(this,'desc')">Snack</button>
+      </div>
+      <label>What did you eat?</label>
+      <textarea id="fdesc" placeholder="e.g. 2 scrambled eggs, toast with butter, glass of OJ…"></textarea>
+      <div class="spin-w" id="dspin"><div class="spin"></div>Calculating with Groq AI…</div>
+      <div class="res" id="dres"></div>
+      <button class="btn" onclick="doAnalyze()">Calculate Macros</button>
+    </div>
+
+    <div class="tp" id="tp-man">
+      <label>Meal</label>
+      <div class="pills" id="pp-man">
+        <button class="pill on" onclick="spill(this,'man')">Breakfast</button>
+        <button class="pill" onclick="spill(this,'man')">Lunch</button>
+        <button class="pill" onclick="spill(this,'man')">Dinner</button>
+        <button class="pill" onclick="spill(this,'man')">Snack</button>
+      </div>
+      <label>Food name</label>
+      <input type="text" id="mn" placeholder="e.g. Chicken & rice" style="margin-bottom:10px">
+      <div class="g2">
+        <div class="gf"><label><span class="dot" style="background:#ff3399"></span>Calories</label><input type="number" id="mc" inputmode="numeric" placeholder="kcal"></div>
+        <div class="gf"><label><span class="dot" style="background:#ff6b35"></span>Protein (g)</label><input type="number" id="mp" inputmode="numeric" placeholder="g"></div>
+        <div class="gf"><label><span class="dot" style="background:#00ccff"></span>Carbs (g)</label><input type="number" id="mca" inputmode="numeric" placeholder="g"></div>
+        <div class="gf"><label><span class="dot" style="background:#ffcc00"></span>Fat (g)</label><input type="number" id="mf" inputmode="numeric" placeholder="g"></div>
+      </div>
+      <button class="btn" onclick="doManual()">Add to Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="pg" id="pg-set">
+  <h1>Goals & <span>Settings</span></h1>
+  <div class="card">
+    <div class="card-h"><span class="card-t">Groq API Key</span><span class="ks" id="ks"></span></div>
+    <div class="card-b">
+      <div class="info">
+        <strong>✅ 100% Free — no credit card ever</strong>
+        <ol>
+          <li>Go to <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
+          <li>Sign up with Google</li>
+          <li>API Keys → Create API Key → copy it</li>
+          <li>Paste below and tap Save</li>
+        </ol>
+        <div style="margin-top:6px">Free: <b style="color:#00ff88">14,400 req/day</b> — enough for years.</div>
+      </div>
+      <div class="kr">
+        <input type="password" id="akey" placeholder="gsk_…" autocomplete="off">
+        <button class="btn-save" onclick="saveKey()">Save</button>
+      </div>
+      <div style="font-size:9px;color:#55556a">Stored only on your device.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-t">Daily Targets</span></div>
+    <div class="card-b">
+      <div class="g2">
+        <div class="gf"><label><span class="dot" style="background:#ff3399"></span>Calories</label><input type="number" id="gcal" inputmode="numeric" placeholder="2000"></div>
+        <div class="gf"><label><span class="dot" style="background:#ff6b35"></span>Protein (g)</label><input type="number" id="gpro" inputmode="numeric" placeholder="150"></div>
+        <div class="gf"><label><span class="dot" style="background:#00ccff"></span>Carbs (g)</label><input type="number" id="gcar" inputmode="numeric" placeholder="250"></div>
+        <div class="gf"><label><span class="dot" style="background:#ffcc00"></span>Fat (g)</label><input type="number" id="gfat" inputmode="numeric" placeholder="65"></div>
+      </div>
+      <button class="btn" onclick="saveGoals()">Save Goals</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-t">Reset</span></div>
+    <div class="card-b">
+      <button class="btn-red" onclick="clearDay()">Clear Today's Log</button>
+      <button class="btn-red" onclick="resetAll()">Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nb on" id="nb-dash" onclick="gp('dash')"><span class="ni">📊</span>Dashboard</button>
+  <button class="nb" id="nb-log" onclick="gp('log')"><span class="ni">➕</span>Log Food</button>
+  <button class="nb" id="nb-set" onclick="gp('set')"><span class="ni">⚙️</span>Settings</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+var log=[], goals={cal:0,pro:0,car:0,fat:0}, pending=null;
+var mDesc='Breakfast', mMan='Breakfast';
+
+// date
+document.querySelector('#pg-dash h1').insertAdjacentHTML('afterend',
+  '<div style="font-size:10px;color:#55556a;padding:0 12px 8px">'+
+  new Date().toLocaleDateString('en-IE',{weekday:'long',day:'numeric',month:'long'})+'</div>');
+
+function init(){
+  var k=localStorage.getItem('groq');
+  if(k){document.getElementById('akey').value=k;document.getElementById('ks').textContent='✓ saved';}
+  var g=localStorage.getItem('goals');
+  if(g){goals=JSON.parse(g);document.getElementById('gcal').value=goals.cal||'';document.getElementById('gpro').value=goals.pro||'';document.getElementById('gcar').value=goals.car||'';document.getElementById('gfat').value=goals.fat||'';}
+  var l=localStorage.getItem('log');
+  if(l){var d=JSON.parse(l);if(d.date===new Date().toDateString())log=d.e;}
+  dash();
+}
+
+function gp(n){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pg-'+n).classList.add('on');
+  document.getElementById('nb-'+n).classList.add('on');
+  window.scrollTo(0,0);
+  if(n==='dash')dash();
+}
+
+function stab(t){
+  document.getElementById('tab-desc').classList.toggle('on',t==='desc');
+  document.getElementById('tab-man').classList.toggle('on',t==='man');
+  document.getElementById('tp-desc').classList.toggle('on',t==='desc');
+  document.getElementById('tp-man').classList.toggle('on',t==='man');
+}
+
+function spill(btn,g){
+  document.querySelectorAll('#pp-'+g+' .pill').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  if(g==='desc')mDesc=btn.textContent; else mMan=btn.textContent;
+}
+
+function saveKey(){
+  var k=document.getElementById('akey').value.trim();
+  if(!k)return;
+  localStorage.setItem('groq',k);
+  document.getElementById('ks').textContent='✓ saved';
+  toast('Key saved ✓');
+}
+function getKey(){return document.getElementById('akey').value.trim()||localStorage.getItem('groq');}
+
+function saveGoals(){
+  goals={cal:+document.getElementById('gcal').value||0,pro:+document.getElementById('gpro').value||0,car:+document.getElementById('gcar').value||0,fat:+document.getElementById('gfat').value||0};
+  localStorage.setItem('goals',JSON.stringify(goals));
+  toast('Goals saved ✓'); dash();
+}
+
+var SYS='You are a nutrition expert. Return ONLY a valid JSON object, no markdown:\n{"name":"meal name","calories":number,"protein":number,"carbs":number,"fat":number,"items":["item1","item2"]}\nAll numbers are integers.';
+
+async function callGroq(msg){
+  var k=getKey();
+  if(!k){toast('Add Groq API key in Settings');return null;}
+  var r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:SYS},{role:'user',content:msg}],temperature:0.2,max_tokens:300})
+  });
+  if(!r.ok){var e=await r.json();throw new Error(e.error&&e.error.message||'Error '+r.status);}
+  var d=await r.json();
+  return d.choices[0].message.content;
+}
+
+async function doAnalyze(){
+  var desc=document.getElementById('fdesc').value.trim();
+  if(!desc){toast('Describe your meal first');return;}
+  var sp=document.getElementById('dspin'),re=document.getElementById('dres');
+  sp.classList.add('on'); re.classList.remove('on'); pending=null;
+  try{
+    var raw=await callGroq('Estimate macros for: '+desc);
+    if(!raw)return;
+    var d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    pending={name:d.name,calories:d.calories,protein:d.protein,carbs:d.carbs,fat:d.fat,items:d.items,meal:mDesc};
+    re.innerHTML='<div class="rname">'+d.name+'</div>'+
+      '<div class="rgrid">'+
+      '<div class="rc"><div class="rv" style="color:#ff3399">'+Math.round(d.calories)+'</div><div class="rl2">kcal</div></div>'+
+      '<div class="rc"><div class="rv" style="color:#ff6b35">'+Math.round(d.protein)+'g</div><div class="rl2">protein</div></div>'+
+      '<div class="rc"><div class="rv" style="color:#00ccff">'+Math.round(d.carbs)+'g</div><div class="rl2">carbs</div></div>'+
+      '<div class="rc"><div class="rv" style="color:#ffcc00">'+Math.round(d.fat)+'g</div><div class="rl2">fat</div></div>'+
+      '</div>'+
+      (d.items&&d.items.length?'<div class="ritems">· '+d.items.join('<br>· ')+'</div>':'')+
+      '<button class="btn-out" onclick="logPending()">＋ Add to Log</button>';
+    re.classList.add('on');
+  }catch(e){
+    re.innerHTML='<div style="color:#ff3355;font-size:11px;padding:4px 0">⚠️ '+e.message+'</div>';
+    re.classList.add('on');
+  }
+  sp.classList.remove('on');
+}
+
+function logPending(){
+  if(!pending)return;
+  addLog(pending); pending=null;
+  document.getElementById('dres').classList.remove('on');
+  document.getElementById('fdesc').value='';
+  toast('Added ✓'); gp('dash');
+}
+
+function doManual(){
+  var n=document.getElementById('mn').value.trim();
+  if(!n){toast('Enter a food name');return;}
+  addLog({name:n,calories:+document.getElementById('mc').value||0,protein:+document.getElementById('mp').value||0,carbs:+document.getElementById('mca').value||0,fat:+document.getElementById('mf').value||0,meal:mMan});
+  ['mn','mc','mp','mca','mf'].forEach(function(id){document.getElementById(id).value='';});
+  toast('Added ✓'); gp('dash');
+}
+
+function addLog(e){
+  log.push(Object.assign({},e,{id:Date.now(),time:new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'})}));
+  saveLog(); dash();
+}
+function delLog(id){log=log.filter(function(e){return e.id!==id;});saveLog();dash();}
+function clearDay(){if(!confirm('Clear today?'))return;log=[];saveLog();dash();toast('Cleared');}
+function resetAll(){if(!confirm('Reset everything?'))return;localStorage.clear();location.reload();}
+function saveLog(){localStorage.setItem('log',JSON.stringify({date:new Date().toDateString(),e:log}));}
+
+function dash(){
+  var t=log.reduce(function(a,e){return{cal:a.cal+(e.calories||0),pro:a.pro+(e.protein||0),car:a.car+(e.carbs||0),fat:a.fat+(e.fat||0)};},{cal:0,pro:0,car:0,fat:0});
+  var C=2*Math.PI*42;
+  var pct=goals.cal?Math.min(t.cal/goals.cal,1):0;
+  var ring=document.getElementById('cring');
+  ring.style.strokeDashoffset=C-pct*C;
+  ring.style.stroke=(t.cal>goals.cal&&goals.cal)?'#ff3355':'#ff3399';
+  document.getElementById('rnum').textContent=Math.round(t.cal);
+  document.getElementById('rlbl').textContent=goals.cal?'/ '+goals.cal:'kcal';
+  document.getElementById('s-eaten').textContent=Math.round(t.cal)+' kcal';
+  if(goals.cal){
+    var rem=goals.cal-Math.round(t.cal);
+    document.getElementById('s-target').textContent=goals.cal+' kcal';
+    document.getElementById('s-target').style.color='#e8e8f0';
+    var sl=document.getElementById('s-left');
+    sl.textContent=rem>=0?rem+' kcal':Math.abs(rem)+' over!';
+    sl.style.color=rem<0?'#ff3355':'#00ff88';
+  }else{
+    document.getElementById('s-target').textContent='— set goal';
+    document.getElementById('s-target').style.color='#55556a';
+    document.getElementById('s-left').textContent='—';
+    document.getElementById('s-left').style.color='#55556a';
+  }
+  function bar(vid,oid,bid,pid,val,goal){
+    var p=goal?Math.min(val/goal*100,100):0,ov=goal&&val>goal;
+    document.getElementById(vid).textContent=Math.round(val)+'g';
+    document.getElementById(oid).textContent=goal?'/ '+goal+'g':'';
+    document.getElementById(bid).style.width=p+'%';
+    if(ov)document.getElementById(bid).style.background='#ff3355';
+    document.getElementById(pid).textContent=goal?Math.round(val/goal*100)+'%'+(ov?' ⚠️'):'';
+  }
+  bar('pv','po','pb','pp',t.pro,goals.pro);
+  bar('cv','co','cb','cp',t.car,goals.car);
+  bar('fv','fo','fb','fp',t.fat,goals.fat);
+  var bd=document.getElementById('logbody');
+  if(!log.length){bd.innerHTML='<div class="empty">Nothing logged yet.<br>Tap ➕ Log Food to start.</div>';return;}
+  var grp={};
+  log.forEach(function(e){if(!grp[e.meal])grp[e.meal]=[];grp[e.meal].push(e);});
+  bd.innerHTML='<div class="log-b">'+['Breakfast','Lunch','Dinner','Snack'].filter(function(m){return grp[m];}).map(function(m){
+    return '<div class="mg"><div class="mt">'+m+'</div>'+grp[m].map(function(e){
+      return '<div class="li"><div class="ln">'+e.name+'</div><div class="lc">'+Math.round(e.calories)+' kcal</div><button class="ld" onclick="delLog('+e.id+')">✕</button></div>';
+    }).join('')+'</div>';
+  }).join('')+'</div>';
+}
+
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2000);}
+init();
+</script>
+</body>
+</html>
